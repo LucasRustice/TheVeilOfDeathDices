@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎲 Keep Roll Dice</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #1e1e2e;
+      --purple: #9b59b6;
+      --pink: #e91e63;
+      --lilac: #c084fc;
+      --text-light: #f8f9fa;
+      --border-color: #e91e63;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    h1 {
+      color: var(--pink);
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px var(--purple);
+    }
+    .roller {
+      background-color: #2b2b3d;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 0 30px rgba(200, 100, 255, 0.2);
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: var(--lilac);
+    }
+    .label-note {
+      font-size: 0.85rem;
+      margin-top: -4px;
+      margin-bottom: 12px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      background-color: #3a3a4d;
+      color: var(--pink);
+      margin-bottom: 20px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 10px var(--pink);
+      outline: none;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    button {
+      flex: 1;
+      padding: 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      background-image: linear-gradient(45deg, var(--purple), #7c3aed);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(233, 30, 99, 0.3);
+      transition: transform 0.3s, box-shadow 0.4s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(233, 30, 99, 0.5);
+    }
+    .result {
+      background-color: #1f1f2d;
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 12px;
+      white-space: pre-line;
+      min-height: 130px;
+      font-size: 1rem;
+      color: var(--text-light);
+      box-shadow: 0 0 20px rgba(155, 89, 182, 0.2);
+      transition: box-shadow 0.5s, background-color 0.5s;
+    }
+    .result:hover {
+      background-color: #292942;
+      box-shadow: 0 0 30px rgba(233, 30, 99, 0.3);
+    }
+    .result .dice {
+      color: var(--pink);
+      font-weight: bold;
+    }
+    #customDiceFields {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    #customDiceFields div {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #customDiceFields input {
+      flex: 1;
+    }
+    #customDiceFields button {
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
+      .roller { padding: 20px; }
+      button { font-size: 0.9rem; padding: 12px; }
+      #customDiceFields {
+        grid-template-columns: 1fr;
+      }
+    }
+    .footer {
+      font-size: 0.7rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-top: 40px;
+      opacity: 0.7;
+    }
+    .footer img {
+      width: 30px;
+      height: 30px;
+      margin: 4px;
+      vertical-align: middle;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .footer img:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Keep Roll Dice</h1>
+
+  <div class="roller">
+    <label for="diceInput">GIRE O DADO</label>
+    <p class="label-note">
+      Formatos válidos:<br>
+      ➤ <b>XdY</b> = Soma (ex: <b>2d6</b>)<br>
+      ➤ <b>X#dY</b> = Maior dado (ex: <b>4#d20</b>)<br>
+      ➤ <b>X#YdZ</b> = Maior conjunto (ex: <b>3#2d6</b>)<br>
+      ➤ Pode somar: <b>4#d6 + 2d4 + 5</b>
+    </p>
+    <input type="text" id="diceInput" placeholder="Ex: 2d6, 4#d20, 3#2d6, +5, ou combinado">
+    <div class="buttons">
+      <button onclick="rollDice()">GIRAR</button>
+      <button onclick="showHistory()">HISTÓRICO</button>
+    </div>
+    <label>RESULTADO DA ROLAGEM</label>
+    <div class="result" id="result"></div>
+    <div class="buttons">
+      <button onclick="copyResult()">COPIAR RESULTADO</button>
+      <button onclick="captureResultAsImage(event)">TIRAR PRINT</button>
+    </div>
+  </div>
+
+  <div class="roller">
+    <label>DADOS PERSONALIZADOS</label>
+    <p class="label-note">
+      Salve até 9 fórmulas. Exemplos:<br>
+      ➤ <b>3d6</b>, <b>4#d20</b>, <b>2#3d8</b>, <b>+5</b><br>
+      ➤ Ou combine: <b>4#d6 + 2d4 + 5</b>
+    </p>
+    <div id="customDiceFields"></div>
+  </div>
+
+  <div class="footer">
+    Desenvolvido por: Łᵾȼꝁє૨<br>
+    Criador da Comunidade Dungeon School RPG<br>
+    <a href="https://chat.whatsapp.com/GroCBjaqWL9HfSOgB7hmkk?mode=ac_c" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/124/124034.png" alt="WhatsApp">
+    </a>
+    <a href="https://discord.gg/Rtj8Et3F82" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/5968/5968756.png" alt="Discord">
+    </a>
+  </div>
+
+<script>
+const history = [];
+const inputField = document.getElementById('diceInput');
+
+function rollDie(sides) {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return (array[0] % sides) + 1;
+}
+
+function rollUniqueDice(qtd, sides) {
+  if (qtd > sides) throw new Error("Não é possível gerar rolagens únicas com mais dados do que lados disponíveis.");
+  const results = new Set();
+  while (results.size < qtd) {
+    results.add(rollDie(sides));
+  }
+  return Array.from(results);
+}
+
+function rollDice() {
+  const input = inputField.value.trim();
+  const resultBox = document.getElementById('result');
+  if (!input) return;
+
+  let output = '';
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  output += `🕜 HORÁRIO DO LANÇAMENTO: ${timeString}\n\n`;
+
+  let finalTotal = 0;
+  let criticalHit = false;
+  let criticalFail = false;
+  let usedHashSingleDice = false;
+
+  const parts = input.replace(/\s+/g, '').split('+');
+
+  parts.forEach(part => {
+    if (/(\d+)#(\d+)d(\d+)/.test(part)) {
+      const match = part.match(/(\d+)#(\d+)d(\d+)/);
+      const sets = parseInt(match[1]);
+      const qtd = parseInt(match[2]);
+      const sides = parseInt(match[3]);
+      let sums = [];
+
+      for (let s = 0; s < sets; s++) {
+        let rolls = rollUniqueDice(qtd, sides);
+        let sum = rolls.reduce((a, b) => a + b, 0);
+        sums.push(sum);
+        output += `🎯 Conjunto ${s + 1}: <span class="dice">[${rolls.join(', ')}]</span> => <span class="dice">${sum}</span>\n`;
+      }
+      const max = Math.max(...sums);
+      finalTotal += max;
+      output += `➡️ Maior conjunto = <span class="dice">${max}</span>\n\n`;
+
+    } else if (/(\d+)#d(\d+)([+-]\d+)?/.test(part)) {
+      usedHashSingleDice = true;
+      const match = part.match(/(\d+)#d(\d+)([+-]\d+)?/);
+      const qtd = parseInt(match[1]);
+      const sides = parseInt(match[2]);
+      const mod = match[3] ? parseInt(match[3]) : 0;
+      let rolls = [];
+      for (let i = 0; i < qtd; i++) {
+        let roll = rollDie(sides);
+        if (roll === 1) criticalFail = true;
+        if (roll === sides) criticalHit = true;
+        rolls.push(roll + mod);
+      }
+      const maxRoll = Math.max(...rolls);
+      finalTotal += maxRoll;
+      output += `🎯 ${qtd}#d${sides}${mod !== 0 ? (mod > 0 ? `+${mod}` : mod) : ''} => <span class="dice">[${rolls.join(', ')}]</span> -> Maior = <span class="dice">${maxRoll}</span>\n\n`;
+
+    } else if (/(\d+)d(\d+)/.test(part)) {
+      const match = part.match(/(\d+)d(\d+)/);
+      const qtd = parseInt(match[1]);
+      const sides = parseInt(match[2]);
+      let rolls = rollUniqueDice(qtd, sides);
+      for (let r of rolls) finalTotal += r;
+      output += `🎲 ${qtd}d${sides} => <span class="dice">[${rolls.join(', ')}]</span> -> Soma = <span class="dice">${rolls.reduce((a, b) => a + b, 0)}</span>\n\n`;
+
+    } else if (/^-?\d+$/.test(part)) {
+      const bonus = parseInt(part);
+      finalTotal += bonus;
+      output += `➕ Bônus Fixo = <span class="dice">${bonus}</span>\n\n`;
+    }
+  });
+
+  output += `➡️ TOTAL FINAL: <span class="dice">${finalTotal}</span> 🎲\n\n`;
+
+  if (usedHashSingleDice) {
+    if (criticalHit) {
+      output += `》 🔥 ACERTO CRÍTICO! 《`;
+    } else if (criticalFail) {
+      output += `》 💣 FALHA CRÍTICA 《`;
+    } else {
+      output += `》 🎲 ROLAGEM NORMAL 《`;
+    }
+  }
+
+  resultBox.innerHTML = output;
+  history.unshift(output);
+}
+
+function showHistory() {
+  const resultBox = document.getElementById('result');
+  if (history.length === 0) {
+    resultBox.textContent = 'Nenhuma rolagem registrada ainda.';
+    return;
+  }
+  let fullHistory = history.map((entry, i) => `🎯 ROLAGEM #${history.length - i}\n${entry}`)
+                           .join('\n\n═══════════════════════════════\n\n');
+  resultBox.innerHTML = fullHistory;
+}
+
+function copyResult() {
+  const resultBox = document.getElementById('result');
+  navigator.clipboard.writeText(resultBox.textContent).then(() => {
+    const button = event.target;
+    const original = button.textContent;
+    button.textContent = 'COPIADO!';
+    setTimeout(() => { button.textContent = original; }, 1500);
+  });
+}
+
+function captureResultAsImage(event) {
+  const resultBox = document.getElementById('result');
+  html2canvas(resultBox).then(canvas => {
+    const now = new Date();
+    const filename = `dice_result_${now.toISOString().replace(/[-:T.]/g, '').slice(0, 14)}_${Math.random().toString(16).slice(2, 6).toUpperCase()}.png`;
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    canvas.toBlob(blob => {
+      if (navigator.clipboard && window.ClipboardItem) {
+        navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      }
+    }, 'image/png');
+  });
+}
+
+function loadCustomDice() {
+  const container = document.getElementById('customDiceFields');
+  const saved = JSON.parse(localStorage.getItem('customDiceValues')) || [];
+  for (let i = 0; i < 9; i++) {
+    const div = document.createElement('div');
+    div.style.display = 'flex';
+    div.style.flexDirection = 'column';
+    div.style.gap = '10px';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Ex: 3d6, 4#d20, 2#3d8, +5';
+    input.value = saved[i] || '';
+
+    const button = document.createElement('button');
+    button.textContent = 'GIRAR';
+    button.onclick = () => { inputField.value = input.value; rollDice(); };
+
+    input.addEventListener('input', () => {
+      saved[i] = input.value;
+      localStorage.setItem('customDiceValues', JSON.stringify(saved));
+    });
+
+    div.appendChild(input);
+    div.appendChild(button);
+    container.appendChild(div);
+  }
+}
+
+window.onload = loadCustomDice;
+</script>
+</body>
+</html>
