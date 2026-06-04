@@ -8,11 +8,12 @@
 
   <style>
     :root {
-      --bg-site: #f4f4f4; /* Branco Off-White / Gelo */
-      --bg-box: rgba(0, 0, 0, 0.92); /* Fundo preto com leve desfoque */
+      --bg-box: rgba(0, 0, 0, 0.92); /* Fundo preto das caixas com leve desfoque */
       --border-gray: #7f8c8d; /* Contorno Cinza */
       --text-light: #f5f5f5;
       --text-dark: #1a1a1a;
+      --text-header: #1a1a1a; /* Retornado para preto para contrastar com a névoa branca */
+      --text-subtitle: #333333; /* Retornado para cinza escuro */
       --accent-white: #ffffff;
     }
 
@@ -23,7 +24,17 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-site);
+      
+      /* ================================================================== */
+      /*  COLE O LINK DA SUA IMAGEM ENTRE AS ASPAS DA URL ABAIXO:            */
+      /* ================================================================== */
+      background-image: url('https://media.desenio.com/site_images/6859ebfe77e838b230d37598_547172873_8308-4.jpg'); 
+      
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed; /* Mantém o fundo estático ao rolar a página */
+      background-repeat: no-repeat;
+      
       color: var(--text-dark);
       font-family: 'Segoe UI', sans-serif;
       display: flex;
@@ -36,10 +47,12 @@
     .header-container {
       text-align: center;
       margin-bottom: 30px;
+      /* Sombra leve atrás do texto para garantir leitura caso a imagem seja clara */
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); 
     }
 
     h1 {
-      color: var(--text-dark);
+      color: var(--text-header);
       font-family: 'Impact', 'Arial Black', sans-serif;
       font-size: 4.5rem;
       margin: 0;
@@ -49,7 +62,7 @@
     }
 
     .subtitle {
-      color: #555555;
+      color: var(--text-subtitle);
       font-size: 1.4rem;
       margin-top: 8px;
       margin-bottom: 6px;
@@ -60,7 +73,7 @@
 
     .author-name {
       font-size: 1.1rem;
-      color: #7f8c8d;
+      color: #555555; /* Ajustado para cinza escuro legível na névoa */
       font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -76,7 +89,7 @@
       padding: 35px;
       width: 100%;
       max-width: 750px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra mais marcante na caixa */
       margin-bottom: 35px;
     }
 
@@ -234,11 +247,12 @@
 
     .footer {
       font-size: 0.9rem;
-      color: var(--text-dark);
+      color: #1a1a1a; /* Texto do rodapé em preto para contrastar com a parte inferior da imagem */
       text-align: center;
       margin-top: 50px;
       font-weight: 600;
       line-height: 1.5;
+      text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.8);
     }
 
     .footer img {
@@ -248,6 +262,7 @@
       vertical-align: middle;
       cursor: pointer;
       transition: transform 0.3s;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
     }
 
     .footer img:hover {
@@ -327,10 +342,9 @@ const history = [];
 
 const inputField = document.getElementById('diceInput');
 
-// Captura o clique da tecla Enter no campo principal de rolagens
 inputField.addEventListener('keydown', function(event) {
   if (event.key === 'Enter') {
-    event.preventDefault(); // Evita comportamentos padrões indesejados
+    event.preventDefault();
     rollDice();
   }
 });
@@ -678,7 +692,6 @@ function loadCustomDice() {
     input.value =
       saved[i] || '';
 
-    // Permite rolar os dados salvos apertando Enter caso o foco esteja no input customizado
     input.addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         event.preventDefault();
